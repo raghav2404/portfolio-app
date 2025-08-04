@@ -1,6 +1,8 @@
 # Overview
 
-This is a personal portfolio website for Raghav Rastogi, a Full Stack .NET Developer with 3+ years of experience. The application showcases his professional experience, skills, projects, and provides a contact form for potential employers or collaborators. Built as a modern web application with a React frontend and Express.js backend, it demonstrates expertise in both client-side and server-side development.
+This is a personal portfolio website for Raghav Rastogi, a Full Stack .NET Developer with 3+ years of experience. The application showcases his professional experience, skills, projects, and provides a contact form for potential employers or collaborators. 
+
+**Current State**: The project includes both the original React + Node.js implementation and a new Angular + .NET 8 conversion in the `PortfolioApp/` directory. The Angular + .NET 8 version represents a migration to the user's preferred technology stack and is approximately 70% complete with a working backend API and frontend component structure.
 
 # User Preferences
 
