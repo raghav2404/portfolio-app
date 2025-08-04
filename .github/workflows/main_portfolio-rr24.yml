@@ -27,8 +27,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-          cache: 'npm'
-          cache-dependency-path: './PortfolioApp/ClientApp/package-lock.json'
 
       - name: Install Angular CLI
         run: npm install -g @angular/cli@17
@@ -37,7 +35,7 @@ jobs:
         run: dotnet restore PortfolioApp/PortfolioApp.csproj
 
       - name: Install Angular dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./PortfolioApp/ClientApp
 
       - name: Build Angular application
