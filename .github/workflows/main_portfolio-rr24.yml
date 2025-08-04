@@ -1,5 +1,5 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# Complete Angular + .NET 8 Deployment Workflow
+# Fixed for one-shot deployment success
 
 name: Build and deploy ASP.Net Core app to Azure Web App - portfolio-rr24
 
@@ -13,48 +13,76 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Verify Node.js installation
+      - name: Setup Node.js (Pre-installed)
         run: |
           node --version
           npm --version
+          npm install -g @angular/cli@17
 
-      - name: Install Angular CLI
-        run: npm install -g @angular/cli@17
-
-      - name: Restore .NET dependencies
-        run: dotnet restore PortfolioApp/PortfolioApp.csproj
+      - name: Verify Angular CLI
+        run: ng version
+        
+      - name: Create Angular workspace directory
+        run: |
+          cd PortfolioApp/ClientApp
+          pwd
+          ls -la
 
       - name: Install Angular dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
         working-directory: ./PortfolioApp/ClientApp
 
       - name: Build Angular application
-        run: ng build --configuration=production --skip-tests
+        run: |
+          pwd
+          ls -la
+          ng build --configuration=production
         working-directory: ./PortfolioApp/ClientApp
 
-      - name: Build .NET application
-        run: dotnet build PortfolioApp/PortfolioApp.csproj --configuration Release --no-restore
+      - name: Verify Angular build output
+        run: |
+          ls -la ../wwwroot || echo "wwwroot not found, checking dist"
+          ls -la dist || echo "No dist folder"
+        working-directory: ./PortfolioApp/ClientApp
 
-      - name: Publish .NET application
-        run: dotnet publish PortfolioApp/PortfolioApp.csproj -c Release -o ./publish
+      - name: Copy Angular build to wwwroot
+        run: |
+          mkdir -p wwwroot
+          if [ -d "ClientApp/dist" ]; then
+            cp -r ClientApp/dist/* wwwroot/
+          fi
+          if [ -d "ClientApp/wwwroot" ]; then
+            cp -r ClientApp/wwwroot/* wwwroot/
+          fi
+          ls -la wwwroot
         working-directory: ./PortfolioApp
 
-      - name: Upload artifact for deployment job
+      - name: Restore .NET dependencies
+        run: dotnet restore PortfolioApp.csproj
+        working-directory: ./PortfolioApp
+
+      - name: Build .NET application
+        run: dotnet build PortfolioApp.csproj --configuration Release --no-restore
+        working-directory: ./PortfolioApp
+
+      - name: Publish .NET application
+        run: |
+          dotnet publish PortfolioApp.csproj -c Release -o ./publish --no-build
+          ls -la ./publish
+        working-directory: ./PortfolioApp
+
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
@@ -64,8 +92,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
@@ -81,7 +109,6 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F3A204480A854136B99837B970F92BA1 }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'portfolio-rr24'
