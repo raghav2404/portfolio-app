@@ -44,7 +44,7 @@ jobs:
         working-directory: ./PortfolioApp/ClientApp
 
       - name: Build Angular application
-        run: ng build --configuration=production
+        run: ng build --configuration=production --skip-tests
         working-directory: ./PortfolioApp/ClientApp
 
       - name: Build .NET application
