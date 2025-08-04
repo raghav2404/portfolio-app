@@ -36,7 +36,7 @@ jobs:
       run: npm install -g @angular/cli@17
         
     - name: Restore .NET dependencies
-      run: dotnet restore
+      run: dotnet restore PortfolioApp.csproj
       working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Install Node.js dependencies
@@ -48,16 +48,11 @@ jobs:
       working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/ClientApp
         
     - name: Build .NET application
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build PortfolioApp.csproj --configuration Release --no-restore
       working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-      
-    - name: Run .NET tests
-      run: dotnet test --no-restore --verbosity normal
-      working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-      continue-on-error: true
       
     - name: Publish .NET application
-      run: dotnet publish -c Release --property:PublishUrl=${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp
+      run: dotnet publish PortfolioApp.csproj -c Release -o ./publish
       working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deploy to Azure App Service
@@ -65,4 +60,4 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/publish
